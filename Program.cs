@@ -1,102 +1,79 @@
 using System;
 
-public class FractionalLinearFunction
+public class Sphere
 {
-    // Закриті поля (інкапсуляція)
-    private double a1, a0;
-    private double b1, b0;
+    protected double _radius;
 
-    // Конструктор
-    public FractionalLinearFunction(double a1, double a0, double b1, double b0)
+    public Sphere(double radius)
     {
-        SetCoefficients(a1, a0, b1, b0);
+        SetCoefficients(radius);
     }
 
-    // Метод завдання коефіцієнтів
-    public virtual void SetCoefficients(double a1, double a0, double b1, double b0)
+    /// <summary>Задати радіус кулі</summary>
+    public virtual void SetCoefficients(double radius)
     {
-        this.a1 = a1;
-        this.a0 = a0;
-        this.b1 = b1;
-        this.b0 = b0;
+        if (radius <= 0)
+            throw new ArgumentException("Радіус повинен бути > 0.");
+
+        _radius = radius;
     }
 
-    // Метод виведення коефіцієнтів
+    /// <summary>Вивести параметри</summary>
     public virtual void Print()
     {
-        Console.WriteLine("Дробово-лінійна функція:");
-        Console.WriteLine($"  Чисельник:   {a1}·x + {a0}");
-        Console.WriteLine($"  Знаменник:   {b1}·x + {b0}");
+        Console.WriteLine("Куля:");
+        Console.WriteLine($"  Радіус: {_radius}");
     }
 
-    // Обчислення значення функції в точці x0
-    public virtual double Value(double x0)
+    /// <summary>Об'єм кулі: 4/3πR^3</summary>
+    public virtual double Volume()
     {
-        double numerator = a1 * x0 + a0;
-        double denominator = b1 * x0 + b0;
-        return numerator / denominator;
+        return 4.0 / 3.0 * Math.PI * Math.Pow(_radius, 3);
     }
 }
 
-// =====================================================================
+///////////////////////////////////////////////////////////
 
-public class FractionFunction : FractionalLinearFunction
+public class Ellipsoid : Sphere
 {
-    private double a2, b2;
+    protected double _a1, _a2, _a3;
 
-    // Конструктор
-    public FractionFunction(double a2, double a1, double a0,
-                            double b2, double b1, double b0)
-        : base(a1, a0, b1, b0)
+    public Ellipsoid(double a1, double a2, double a3)
+        : base(a1)
     {
-        this.a2 = a2;
-        this.b2 = b2;
+        SetCoefficients(a1, a2, a3);
     }
 
-    // Перевантажений метод завдання коефіцієнтів
-    public void SetCoefficients(double a2, double a1, double a0,
-                                double b2, double b1, double b0)
+    /// <summary>Задати півосі еліпсоїда</summary>
+    public void SetCoefficients(double a1, double a2, double a3)
     {
-        base.SetCoefficients(a1, a0, b1, b0);
-        this.a2 = a2;
-        this.b2 = b2;
+        if (a1 <= 0 || a2 <= 0 || a3 <= 0)
+            throw new ArgumentException("Всі півосі мають бути > 0.");
+
+        _a1 = a1;
+        _a2 = a2;
+        _a3 = a3;
+
+        // базовий радіус = одна з осей, щоб не ламати базу
+        base.SetCoefficients(a1);
     }
 
-    // Перевизначений метод виведення
     public override void Print()
     {
-        Console.WriteLine("Дробова функція (квадрат/квадрат):");
-        Console.WriteLine($"  Чисельник:   {a2}·x² + {GetA1()}·x + {GetA0()}");
-        Console.WriteLine($"  Знаменник:   {b2}·x² + {GetB1()}·x + {GetB0()}");
+        Console.WriteLine("Еліпсоїд:");
+        Console.WriteLine($"  Піввісь a1 = {_a1}");
+        Console.WriteLine($"  Піввісь a2 = {_a2}");
+        Console.WriteLine($"  Піввісь a3 = {_a3}");
     }
 
-    // Метод доступу до захищених значень (інкапсуляція)
-    private double GetA1() => typeof(FractionalLinearFunction)
-        .GetField("a1", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-        .GetValue(this) as double? ?? 0;
-
-    private double GetA0() => typeof(FractionalLinearFunction)
-        .GetField("a0", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-        .GetValue(this) as double? ?? 0;
-
-    private double GetB1() => typeof(FractionalLinearFunction)
-        .GetField("b1", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-        .GetValue(this) as double? ?? 0;
-
-    private double GetB0() => typeof(FractionalLinearFunction)
-        .GetField("b0", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-        .GetValue(this) as double? ?? 0;
-
-    // Обчислення значення в точці
-    public override double Value(double x0)
+    /// <summary>Об'єм еліпсоїда: 4/3π·a1·a2·a3</summary>
+    public override double Volume()
     {
-        double numerator = a2 * x0 * x0 + GetA1() * x0 + GetA0();
-        double denominator = b2 * x0 * x0 + GetB1() * x0 + GetB0();
-        return numerator / denominator;
+        return 4.0 / 3.0 * Math.PI * _a1 * _a2 * _a3;
     }
 }
 
-// =====================================================================
+///////////////////////////////////////////////////////////
 
 class Program
 {
@@ -104,16 +81,16 @@ class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-        // Дробово-лінійна функція
-        FractionalLinearFunction f1 = new FractionalLinearFunction(2, 5, 1, 3);
-        f1.Print();
-        Console.WriteLine("Значення при x0 = 2: " + f1.Value(2));
+        // Куля
+        Sphere s = new Sphere(5);
+        s.Print();
+        Console.WriteLine("Об'єм кулі = " + s.Volume());
 
         Console.WriteLine();
 
-        // Дробова функція (квадрат/квадрат)
-        FractionFunction f2 = new FractionFunction(1, 2, 3, 4, 5, 6);
-        f2.Print();
-        Console.WriteLine("Значення при x0 = 2: " + f2.Value(2));
+        // Еліпсоїд
+        Ellipsoid e = new Ellipsoid(3, 4, 5);
+        e.Print();
+        Console.WriteLine("Об'єм еліпсоїда = " + e.Volume());
     }
 }
