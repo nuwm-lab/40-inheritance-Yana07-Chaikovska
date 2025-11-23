@@ -1,96 +1,100 @@
 using System;
 
-public class Sphere
+public class DirectionVector
 {
-    protected double _radius;
+    // Приватні поля
+    private double _x;
+    private double _y;
 
-    public Sphere(double radius)
+    // Властивості
+    public double X
     {
-        SetCoefficients(radius);
+        get => _x;
+        set => _x = value;
     }
 
-    /// <summary>Задати радіус кулі</summary>
-    public virtual void SetCoefficients(double radius)
+    public double Y
     {
-        if (radius <= 0)
-            throw new ArgumentException("Радіус повинен бути > 0.");
-
-        _radius = radius;
+        get => _y;
+        set => _y = value;
     }
 
-    /// <summary>Вивести параметри</summary>
-    public virtual void Print()
+    // Конструктор
+    public DirectionVector(double x, double y)
     {
-        Console.WriteLine("Куля:");
-        Console.WriteLine($"  Радіус: {_radius}");
+        _x = x;
+        _y = y;
     }
 
-    /// <summary>Об'єм кулі: 4/3πR^3</summary>
-    public virtual double Volume()
+    // Довжина вектора (корінь)
+    public double Length => Math.Sqrt(_x * _x + _y * _y);
+
+    // Квадрат довжини для оптимізації порівняння
+    public double LengthSquared => _x * _x + _y * _y;
+
+    // Для красивого виводу
+    public override string ToString()
     {
-        return 4.0 / 3.0 * Math.PI * Math.Pow(_radius, 3);
+        return $"({X}, {Y})";
     }
 }
-
-///////////////////////////////////////////////////////////
-
-public class Ellipsoid : Sphere
-{
-    protected double _a1, _a2, _a3;
-
-    public Ellipsoid(double a1, double a2, double a3)
-        : base(a1)
-    {
-        SetCoefficients(a1, a2, a3);
-    }
-
-    /// <summary>Задати півосі еліпсоїда</summary>
-    public void SetCoefficients(double a1, double a2, double a3)
-    {
-        if (a1 <= 0 || a2 <= 0 || a3 <= 0)
-            throw new ArgumentException("Всі півосі мають бути > 0.");
-
-        _a1 = a1;
-        _a2 = a2;
-        _a3 = a3;
-
-        // базовий радіус = одна з осей, щоб не ламати базу
-        base.SetCoefficients(a1);
-    }
-
-    public override void Print()
-    {
-        Console.WriteLine("Еліпсоїд:");
-        Console.WriteLine($"  Піввісь a1 = {_a1}");
-        Console.WriteLine($"  Піввісь a2 = {_a2}");
-        Console.WriteLine($"  Піввісь a3 = {_a3}");
-    }
-
-    /// <summary>Об'єм еліпсоїда: 4/3π·a1·a2·a3</summary>
-    public override double Volume()
-    {
-        return 4.0 / 3.0 * Math.PI * _a1 * _a2 * _a3;
-    }
-}
-
-///////////////////////////////////////////////////////////
 
 class Program
 {
     static void Main()
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.Write("Введіть кількість векторів n (>0): ");
 
-        // Куля
-        Sphere s = new Sphere(5);
-        s.Print();
-        Console.WriteLine("Об'єм кулі = " + s.Volume());
+        if (!int.TryParse(Console.ReadLine(), out int n) || n <= 0)
+        {
+            Console.WriteLine("Помилка: n повинно бути додатним числом.");
+            return;
+        }
 
-        Console.WriteLine();
+        DirectionVector[] vectors = new DirectionVector[n];
 
-        // Еліпсоїд
-        Ellipsoid e = new Ellipsoid(3, 4, 5);
-        e.Print();
-        Console.WriteLine("Об'єм еліпсоїда = " + e.Volume());
+        for (int i = 0; i < n; i++)
+        {
+            Console.WriteLine($"\nВведення даних для вектора #{i + 1}:");
+
+            double x, y;
+
+            // Ввід X
+            while (true)
+            {
+                Console.Write("  X = ");
+                if (double.TryParse(Console.ReadLine(), out x))
+                    break;
+
+                Console.WriteLine("  Некоректне число. Спробуйте ще раз.");
+            }
+
+            // Ввід Y
+            while (true)
+            {
+                Console.Write("  Y = ");
+                if (double.TryParse(Console.ReadLine(), out y))
+                    break;
+
+                Console.WriteLine("  Некоректне число. Спробуйте ще раз.");
+            }
+
+            vectors[i] = new DirectionVector(x, y);
+        }
+
+        // Пошук найдовшого вектора
+        DirectionVector maxVector = vectors[0];
+
+        for (int i = 1; i < n; i++)
+        {
+            if (vectors[i].LengthSquared > maxVector.LengthSquared)
+            {
+                maxVector = vectors[i];
+            }
+        }
+
+        // Вивід результату
+        Console.WriteLine("\nНайдовший вектор: " + maxVector);
+        Console.WriteLine($"Довжина: {maxVector.Length:F3}");
     }
 }
