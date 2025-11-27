@@ -1,100 +1,92 @@
 using System;
 
-public class DirectionVector
+namespace FractionFunctions
 {
-    // Приватні поля
-    private double _x;
-    private double _y;
-
-    // Властивості
-    public double X
+    // ----------------------- БАЗОВИЙ КЛАС -------------------------
+    class FractionLinear
     {
-        get => _x;
-        set => _x = value;
-    }
+        // Інкапсульовані коефіцієнти
+        protected double a1, a0;
+        protected double b1, b0;
 
-    public double Y
-    {
-        get => _y;
-        set => _y = value;
-    }
-
-    // Конструктор
-    public DirectionVector(double x, double y)
-    {
-        _x = x;
-        _y = y;
-    }
-
-    // Довжина вектора (корінь)
-    public double Length => Math.Sqrt(_x * _x + _y * _y);
-
-    // Квадрат довжини для оптимізації порівняння
-    public double LengthSquared => _x * _x + _y * _y;
-
-    // Для красивого виводу
-    public override string ToString()
-    {
-        return $"({X}, {Y})";
-    }
-}
-
-class Program
-{
-    static void Main()
-    {
-        Console.Write("Введіть кількість векторів n (>0): ");
-
-        if (!int.TryParse(Console.ReadLine(), out int n) || n <= 0)
+        // Метод задавання коефіцієнтів
+        public virtual void SetCoefficients(double a1, double a0, double b1, double b0)
         {
-            Console.WriteLine("Помилка: n повинно бути додатним числом.");
-            return;
+            this.a1 = a1;
+            this.a0 = a0;
+            this.b1 = b1;
+            this.b0 = b0;
         }
 
-        DirectionVector[] vectors = new DirectionVector[n];
-
-        for (int i = 0; i < n; i++)
+        // Виведення коефіцієнтів
+        public virtual void Print()
         {
-            Console.WriteLine($"\nВведення даних для вектора #{i + 1}:");
-
-            double x, y;
-
-            // Ввід X
-            while (true)
-            {
-                Console.Write("  X = ");
-                if (double.TryParse(Console.ReadLine(), out x))
-                    break;
-
-                Console.WriteLine("  Некоректне число. Спробуйте ще раз.");
-            }
-
-            // Ввід Y
-            while (true)
-            {
-                Console.Write("  Y = ");
-                if (double.TryParse(Console.ReadLine(), out y))
-                    break;
-
-                Console.WriteLine("  Некоректне число. Спробуйте ще раз.");
-            }
-
-            vectors[i] = new DirectionVector(x, y);
+            Console.WriteLine($"f(x) = ({a1}x + {a0}) / ({b1}x + {b0})");
         }
 
-        // Пошук найдовшого вектора
-        DirectionVector maxVector = vectors[0];
-
-        for (int i = 1; i < n; i++)
+        // Обчислення значення в точці
+        public virtual double Value(double x)
         {
-            if (vectors[i].LengthSquared > maxVector.LengthSquared)
-            {
-                maxVector = vectors[i];
-            }
+            double denominator = b1 * x + b0;
+            if (denominator == 0)
+                throw new DivideByZeroException("Знаменник дорівнює нулю!");
+
+            return (a1 * x + a0) / denominator;
+        }
+    }
+
+    // ----------------------- ПОХІДНИЙ КЛАС -------------------------
+    class FractionQuadratic : FractionLinear
+    {
+        protected double a2, b2;
+
+        // Перевантажений метод задавання коефіцієнтів
+        public void SetCoefficients(double a2, double a1, double a0, double b2, double b1, double b0)
+        {
+            this.a2 = a2;
+            this.a1 = a1;
+            this.a0 = a0;
+
+            this.b2 = b2;
+            this.b1 = b1;
+            this.b0 = b0;
         }
 
-        // Вивід результату
-        Console.WriteLine("\nНайдовший вектор: " + maxVector);
-        Console.WriteLine($"Довжина: {maxVector.Length:F3}");
+        // Перевантажений метод виведення
+        public override void Print()
+        {
+            Console.WriteLine($"g(x) = ({a2}x^2 + {a1}x + {a0}) / ({b2}x^2 + {b1}x + {b0})");
+        }
+
+        // Перевантажений метод обчислення
+        public override double Value(double x)
+        {
+            double denominator = b2 * x * x + b1 * x + b0;
+            if (denominator == 0)
+                throw new DivideByZeroException("Знаменник дорівнює нулю!");
+
+            return (a2 * x * x + a1 * x + a0) / denominator;
+        }
+    }
+
+    // ----------------------- ТЕСТУВАННЯ -------------------------
+    class Program
+    {
+        static void Main()
+        {
+            // Створення об'єкту дробово-лінійної функції
+            FractionLinear f = new FractionLinear();
+            f.SetCoefficients(2, 3, 4, 5);  // f(x) = (2x + 3) / (4x + 5)
+            f.Print();
+            Console.WriteLine("f(2) = " + f.Value(2));
+
+            Console.WriteLine();
+
+            // Створення об'єкту дробової квадратичної функції
+            FractionQuadratic g = new FractionQuadratic();
+            g.SetCoefficients(1, 2, 3, 1, 0, 4); // g(x) = (1x² + 2x + 3) / (1x² + 0x + 4)
+            g.Print();
+            Console.WriteLine("g(2) = " + g.Value(2));
+        }
     }
 }
