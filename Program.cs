@@ -2,95 +2,111 @@ using System;
 
 class Sphere
 {
-    private double b1, b2, b3; // координати центру
-    private double radius;    // радіус
+    private double _b1, _b2, _b3;  
+    private double _radius;
 
-    public double B1 { get => b1; set => b1 = value; }
-    public double B2 { get => b2; set => b2 = value; }
-    public double B3 { get => b3; set => b3 = value; }
+    public double B1 { get => _b1; set => _b1 = value; }
+    public double B2 { get => _b2; set => _b2 = value; }
+    public double B3 { get => _b3; set => _b3 = value; }
 
     public double Radius
     {
-        get => radius;
+        get => _radius;
         set
         {
             if (value <= 0)
                 throw new ArgumentException("Радіус має бути > 0");
-            radius = value;
+            _radius = value;
         }
     }
 
-    public virtual void SetCoefficients(double b1, double b2, double b3, double r)
+    public Sphere(double b1, double b2, double b3, double radius)
     {
         B1 = b1;
         B2 = b2;
         B3 = b3;
-        Radius = r;
-    }
-
-    public virtual void Print()
-    {
-        Console.WriteLine($"Куля: центр ({B1}, {B2}, {B3}), радіус = {Radius}");
+        Radius = radius;
     }
 
     public virtual double Volume()
     {
         return (4.0 / 3.0) * Math.PI * Math.Pow(Radius, 3);
     }
-}
 
+    public override string ToString()
+    {
+        return $"Sphere: center=({B1},{B2},{B3}), R={Radius}";
+    }
+}
 
 class Ellipsoid : Sphere
 {
-    private double a1, a2, a3;
+    private double _a1, _a2, _a3;
 
-    public double A1 { get => a1; set => a1 = value; }
-    public double A2 { get => a2; set => a2 = value; }
-    public double A3 { get => a3; set => a3 = value; }
-
-    public override void SetCoefficients(double b1, double b2, double b3, double r)
+    public double A1
     {
-        base.SetCoefficients(b1, b2, b3, r);
+        get => _a1;
+        set
+        {
+            if (value <= 0)
+                throw new ArgumentException("A1 має бути > 0");
+            _a1 = value;
+        }
+    }
+    public double A2
+    {
+        get => _a2;
+        set
+        {
+            if (value <= 0)
+                throw new ArgumentException("A2 має бути > 0");
+            _a2 = value;
+        }
+    }
+    public double A3
+    {
+        get => _a3;
+        set
+        {
+            if (value <= 0)
+                throw new ArgumentException("A3 має бути > 0");
+            _a3 = value;
+        }
     }
 
-    public void SetCoefficients(double b1, double b2, double b3, double r,
-                                double a1, double a2, double a3)
+    // radius тут використовується як радіус опорної сфери (як просив викладач)
+    public Ellipsoid(double b1, double b2, double b3, double radius,
+                     double a1, double a2, double a3)
+        : base(b1, b2, b3, radius)
     {
-        base.SetCoefficients(b1, b2, b3, r);
         A1 = a1;
         A2 = a2;
         A3 = a3;
-    }
-
-    public override void Print()
-    {
-        Console.WriteLine(
-            $"Еліпсоїд: центр ({B1}, {B2}, {B3}), радіус-кулі = {Radius}, " +
-            $"півосі: a1={A1}, a2={A2}, a3={A3}"
-        );
     }
 
     public override double Volume()
     {
         return (4.0 / 3.0) * Math.PI * A1 * A2 * A3;
     }
-}
 
+    public override string ToString()
+    {
+        return $"Ellipsoid: center=({B1},{B2},{B3}), axes=({A1},{A2},{A3}), sphereR={Radius}";
+    }
+}
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        Console.WriteLine("=== Тест класу Sphere ===");
-        Sphere s = new Sphere();
-        s.SetCoefficients(0, 0, 0, 5);
-        s.Print();
-        Console.WriteLine($"Обʼєм кулі = {s.Volume():F3}");
+        Console.WriteLine("=== Sphere Test ===");
+        Sphere s = new Sphere(0, 0, 0, 5);
+        Console.WriteLine(s);
+        Console.WriteLine($"Volume: {s.Volume():F4}");
 
-        Console.WriteLine("\n=== Тест класу Ellipsoid ===");
-        Ellipsoid e = new Ellipsoid();
-        e.SetCoefficients(0, 0, 0, 3, 2, 4, 1);
-        e.Print();
-        Console.WriteLine($"Обʼєм еліпсоїда = {e.Volume():F3}");
+        Console.WriteLine("\n=== Ellipsoid Test ===");
+        Ellipsoid e = new Ellipsoid(0, 0, 0, 3, 2, 4, 1);
+        Console.WriteLine(e);
+        Console.WriteLine($"Volume: {e.Volume():F4}");
     }
 }
