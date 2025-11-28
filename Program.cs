@@ -105,8 +105,8 @@ namespace Geometry3D
     /// <summary>
     /// Клас Еліпсоїд (Ellipsoid).
     /// Напіввісі: a = SemiAxisA, b = SemiAxisB, c = SemiAxisC.
-    /// Центр -- з базового класу (b1,b2,b3).
-    /// Площа поверхні -- апроксимація Кнуд Томсена.
+    /// Центр — з базового класу (b1,b2,b3).
+    /// Площа поверхні — апроксимація Кнуд Томсена.
     /// </summary>
     public class Ellipsoid : Solid3D
     {
@@ -162,7 +162,7 @@ namespace Geometry3D
         public override double Volume() => 4.0 / 3.0 * Math.PI * SemiAxisA * SemiAxisB * SemiAxisC;
 
         /// <summary>
-        /// Площа поверхні -- апроксимація Кнуд Томсена:
+        /// Площа поверхні — апроксимація Кнуд Томсена:
         /// S ≈ 4π * [ ( (a^p * b^p) + (a^p * c^p) + (b^p * c^p) ) / 3 ]^(1/p)
         /// p ≈ 1.6075 (добре для більшості еліпсоїдів)
         /// </summary>
@@ -224,5 +224,3 @@ namespace Geometry3D
         }
     }
 }
-
-Результат виконання роботи
