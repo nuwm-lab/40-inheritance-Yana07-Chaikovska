@@ -1,71 +1,78 @@
 using System;
 
-class FractionLinearFunction
+class Sphere
 {
-    protected double a1, a0; 
-    protected double b1, b0;
+    private double b1, b2, b3; // координати центру
+    private double radius;    // радіус
 
-    public void SetCoefficients(double a1, double a0, double b1, double b0)
+    public double B1 { get => b1; set => b1 = value; }
+    public double B2 { get => b2; set => b2 = value; }
+    public double B3 { get => b3; set => b3 = value; }
+
+    public double Radius
     {
-        this.a1 = a1;
-        this.a0 = a0;
-        this.b1 = b1;
-        this.b0 = b0;
+        get => radius;
+        set
+        {
+            if (value <= 0)
+                throw new ArgumentException("Радіус має бути > 0");
+            radius = value;
+        }
+    }
+
+    public virtual void SetCoefficients(double b1, double b2, double b3, double r)
+    {
+        B1 = b1;
+        B2 = b2;
+        B3 = b3;
+        Radius = r;
     }
 
     public virtual void Print()
     {
-        Console.WriteLine($"f(x) = ({a1}x + {a0}) / ({b1}x + {b0})");
+        Console.WriteLine($"Куля: центр ({B1}, {B2}, {B3}), радіус = {Radius}");
     }
 
-    public virtual double Calculate(double x)
+    public virtual double Volume()
     {
-        double numerator = a1 * x + a0;
-        double denominator = b1 * x + b0;
-
-        if (denominator == 0)
-        {
-            Console.WriteLine("Помилка: знаменник = 0");
-            return double.NaN;
-        }
-
-        return numerator / denominator;
+        return (4.0 / 3.0) * Math.PI * Math.Pow(Radius, 3);
     }
 }
 
 
-class FractionFunction : FractionLinearFunction
+class Ellipsoid : Sphere
 {
-    protected double a2, b2;
+    private double a1, a2, a3;
 
-    public void SetCoefficients(double a2, double a1, double a0,
-                                double b2, double b1, double b0)
+    public double A1 { get => a1; set => a1 = value; }
+    public double A2 { get => a2; set => a2 = value; }
+    public double A3 { get => a3; set => a3 = value; }
+
+    public override void SetCoefficients(double b1, double b2, double b3, double r)
     {
-        this.a2 = a2;
-        this.a1 = a1;
-        this.a0 = a0;
-        this.b2 = b2;
-        this.b1 = b1;
-        this.b0 = b0;
+        base.SetCoefficients(b1, b2, b3, r);
+    }
+
+    public void SetCoefficients(double b1, double b2, double b3, double r,
+                                double a1, double a2, double a3)
+    {
+        base.SetCoefficients(b1, b2, b3, r);
+        A1 = a1;
+        A2 = a2;
+        A3 = a3;
     }
 
     public override void Print()
     {
-        Console.WriteLine($"f(x) = ({a2}x^2 + {a1}x + {a0}) / ({b2}x^2 + {b1}x + {b0})");
+        Console.WriteLine(
+            $"Еліпсоїд: центр ({B1}, {B2}, {B3}), радіус-кулі = {Radius}, " +
+            $"півосі: a1={A1}, a2={A2}, a3={A3}"
+        );
     }
 
-    public override double Calculate(double x)
+    public override double Volume()
     {
-        double numerator = a2 * x * x + a1 * x + a0;
-        double denominator = b2 * x * x + b1 * x + b0;
-
-        if (denominator == 0)
-        {
-            Console.WriteLine("Помилка: знаменник = 0");
-            return double.NaN;
-        }
-
-        return numerator / denominator;
+        return (4.0 / 3.0) * Math.PI * A1 * A2 * A3;
     }
 }
 
@@ -74,16 +81,16 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("=== Дробово-лінійна функція ===");
-        FractionLinearFunction f1 = new FractionLinearFunction();
-        f1.SetCoefficients(2, 1, 1, 3);  // a1=2, a0=1, b1=1, b0=3
-        f1.Print();
-        Console.WriteLine("f(2) = " + f1.Calculate(2));
+        Console.WriteLine("=== Тест класу Sphere ===");
+        Sphere s = new Sphere();
+        s.SetCoefficients(0, 0, 0, 5);
+        s.Print();
+        Console.WriteLine($"Обʼєм кулі = {s.Volume():F3}");
 
-        Console.WriteLine("\n=== Дробова функція ===");
-        FractionFunction f2 = new FractionFunction();
-        f2.SetCoefficients(1, 2, 3, 4, 5, 6);
-        f2.Print();
-        Console.WriteLine("f(2) = " + f2.Calculate(2));
+        Console.WriteLine("\n=== Тест класу Ellipsoid ===");
+        Ellipsoid e = new Ellipsoid();
+        e.SetCoefficients(0, 0, 0, 3, 2, 4, 1);
+        e.Print();
+        Console.WriteLine($"Обʼєм еліпсоїда = {e.Volume():F3}");
     }
 }
