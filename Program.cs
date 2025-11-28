@@ -225,4 +225,3 @@ namespace Geometry3D
     }
 }
 
-Р
